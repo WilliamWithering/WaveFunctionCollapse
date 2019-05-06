@@ -22,7 +22,7 @@ import const
 pg.init()
 window = pg.display.set_mode(((const.W_output*(const.N-1)+1)*const.zoom,
                               (const.H_output*(const.N-1)+1)*const.zoom))
-pat = classPatterns.Patterns("Forest.png",const.N)
+pat = classPatterns.Patterns("Samples/Flowers.png",const.N, rotate = False)
 output = classOutput.Output(const.W_output,const.H_output,pat)
 
 output.init_entropy()

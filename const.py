@@ -1,4 +1,4 @@
-W_output = 20
-H_output = 20
-N = 3
+W_output = 10
+H_output = 10
+N = 4
 zoom = 15

@@ -5,7 +5,7 @@ import pygame as pg
 
 
 class Patterns:
-    def __init__(self, input, N):
+    def __init__(self, input, N, rotate):
         """
             This function counts the different patterns found in input
             and returns an array of sub-images and frequencies
@@ -24,13 +24,18 @@ class Patterns:
                 pattern = img.crop((i,j,i+N,j+N))
 
                 #For each pattern rotation, we check wether it's alerady in the pattern list
-                for p in [pattern,
+                if(rotate):
+                    to_check = [pattern,
                           pattern.transpose(Image.ROTATE_90),
                           pattern.transpose(Image.ROTATE_180),
                           pattern.transpose(Image.ROTATE_270),
                           pattern.transpose(Image.FLIP_LEFT_RIGHT),
                           pattern.transpose(Image.FLIP_TOP_BOTTOM),
-                          pattern.transpose(Image.TRANSPOSE)]:
+                          pattern.transpose(Image.TRANSPOSE)]
+                else :
+                    to_check = [pattern]
+
+                for p in to_check:
                     self.total += 1
 
                     if not(p in self.patterns):
@@ -39,6 +44,8 @@ class Patterns:
                     else:
                         k = self.patterns.index(p)
                         self.appearance[k] += 1
+
+
         print("{} patterns trouvés ! ".format(len(self.patterns)))
         self.frequencies = [x/self.total for x in self.appearance]
 
@@ -60,7 +67,6 @@ class Patterns:
 
         for i in range(9):
             for j in range(10):
-
                 if(i+j*9 < len(self.patterns)):
                     str = self.patterns[i+j*9].tobytes("raw","RGB")
                     surf = pg.image.fromstring(str, (self.N,self.N), "RGB")

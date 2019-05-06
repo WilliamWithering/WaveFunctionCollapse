@@ -11,20 +11,21 @@ class Output:
             Initializes the wave and stores sizes and Patterns
         """
         self.wave = [[[True for _ in range(len(P.patterns))]
-                            for _ in range(Y)]
                             for _ in range(X)]
+                            for _ in range(Y)]
         self.X = X
         self.Y = Y
         self.patterns = P
         self.N = P.N
 
-        self.squares = [[None for _ in range(self.Y)]
-                              for _ in range(self.X)]
-        self.cur_app = [0 for _ in range(len(self.patterns.patterns))]
+        self.squares = [[None for _ in range(self.X)]
+                              for _ in range(self.Y)]
+
+        self.cur_app = [0 for _ in range(len(P.patterns))]
 
         # Not the real entropy for now, but will be reevaluated later
-        self.entropies = [[1 for _ in range(self.Y)]
-                             for _ in range(self.X)]
+        self.entropies = [[1 for _ in range(self.X)]
+                             for _ in range(self.Y)]
 
 
 
@@ -58,13 +59,14 @@ class Output:
 
         for i in range(self.Y):
             for j in range(self.X):
-
-                add = np.zeros_like(self.patterns.patterns[0].getdata(), dtype="float").reshape(self.N,self.N,-1)
+                add = np.zeros_like(np.asarray(self.patterns.patterns[0]), dtype="float")#.reshape(self.N,self.N,-1)
                 active = sum(self.wave[i][j])
-                for k in range(len(self.patterns.patterns)):
-                    if self.wave[i][j][k] == 1:
-                        add += np.asarray(self.patterns.patterns[k]).astype('float') / active
-                self.squares[i][j] = add.astype('int')
+
+                indices = [i for i, x in enumerate(self.wave[i][j]) if x == 1]
+                for k in indices:
+                    add += np.asarray(self.patterns.patterns[k]).astype('float') / active
+                self.squares[j][i] = add.astype('int')
+
 
         for i in range(self.Y):
             for j in range(self.X):
@@ -73,8 +75,6 @@ class Output:
                 surf = pg.transform.scale(surf,sizes)
                 window.blit(surf,(j*(self.N-1)*const.zoom,i*(self.N-1)*const.zoom))
         pg.display.flip()
-
-
 
 
 
@@ -99,12 +99,10 @@ class Output:
                     min = self.entropies[i][j]
                     coords = [(i,j)]
 
-        #If more than 1 occurence of min :
         if len(coords)>1:
             return random.choice(coords)
         else:
             return coords[0]
-
 
 
 
@@ -134,18 +132,24 @@ class Output:
         print("Collapsing : {}".format(coords))
         i = coords[0]
         j = coords[1]
-        #Sample frequencies
-        freq = np.asarray(self.patterns.frequencies)
-        #Current frequencies
-        curr_freq = np.asarray(self.cur_app)/(self.X * self.Y)
+        #
+        # #Sample frequencies
+        # freq = np.asarray(self.patterns.frequencies)
+        # #Current frequencies
+        # curr_freq = np.asarray(self.cur_app)/(self.X * self.Y)
+        #
+        # d_curr_freq = freq - curr_freq
+        # d_curr_freq = [d_curr_freq[k] if self.wave[i][j][k]==1 else 0 for k in range(len(self.wave[i][j]))]
+        #
+        # max = np.argmax(d_curr_freq)
+        #
+        # print("Collapsing for index {}, dfreq = {}".format(max, d_curr_freq[max]))
 
-        d_curr_freq = freq - curr_freq
-        d_curr_freq = [d_curr_freq[k] if self.wave[i][j][k]==1 else 0 for k in range(len(self.wave[i][j]))]
-
-        max = np.argmax(d_curr_freq)
-        # print(d_curr_freq)
-        #print("Possibilities : {}".format(self.wave[i][j]))
-        print("\nCollapsing for index {}, dfreq = {}".format(max, d_curr_freq[max]))
+        #Just a random choice
+        indices = [i for i, x in enumerate(self.wave[i][j]) if x == 1]
+        max = random.choice(indices)
+        print("Possible indices : {}".format(indices))
+        print("Collapsing for index {}".format(max))
 
         self.wave[i][j] = np.zeros_like(self.wave[i][j])
         self.wave[i][j][max] = 1
@@ -167,25 +171,25 @@ class Output:
         indices = [i for i, x in enumerate(self.wave[(i-1)%self.Y][(j-1)%self.X]) if x == 1]
         for k in indices:
             if(self.patterns.patterns[k].getpixel((self.N-1,self.N-1)) != collapsed_pattern.getpixel((0,0))):
-                self.wave[(i-1)%self.Y][(j-1)%self.X][k] = 0
+                self.wave[(i-1)%self.Y][(j-1)%self.X][k] = False
 
         #top right
         indices = [i for i, x in enumerate(self.wave[(i-1)%self.Y][(j+1)%self.X]) if x == 1]
         for k in indices:
             if(self.patterns.patterns[k].getpixel((0,self.N-1)) != collapsed_pattern.getpixel((self.N-1,0))):
-                self.wave[(i-1)%self.Y][(j+1)%self.X][k] = 0
+                self.wave[(i-1)%self.Y][(j+1)%self.X][k] = False
 
         #bottom left
         indices = [i for i, x in enumerate(self.wave[(i+1)%self.Y][(j-1)%self.X]) if x == 1]
         for k in indices:
             if(self.patterns.patterns[k].getpixel((self.N-1,0)) != collapsed_pattern.getpixel((0,self.N-1))):
-                self.wave[(i+1)%self.Y][(j-1)%self.X][k] = 0
+                self.wave[(i+1)%self.Y][(j-1)%self.X][k] = False
 
         #bottom right
         indices = [i for i, x in enumerate(self.wave[(i+1)%self.Y][(j+1)%self.X]) if x == 1]
         for k in indices:
             if(self.patterns.patterns[k].getpixel((0,0)) != collapsed_pattern.getpixel((self.N-1,self.N-1))):
-                self.wave[(i+1)%self.Y][(j+1)%self.X][k] = 0
+                self.wave[(i+1)%self.Y][(j+1)%self.X][k] = False
 
         #left
         indices = [i for i, x in enumerate(self.wave[(i)%self.Y][(j-1)%self.X]) if x == 1]
@@ -196,7 +200,7 @@ class Output:
                     ok = 0
                     break
             if ok==0 :
-                self.wave[(i)%self.Y][(j-1)%self.X][k] = 0
+                self.wave[(i)%self.Y][(j-1)%self.X][k] = False
 
         #top
         indices = [i for i, x in enumerate(self.wave[(i-1)%self.Y][(j)%self.X]) if x == 1]
@@ -207,7 +211,7 @@ class Output:
                     ok = 0
                     break
             if ok==0 :
-                self.wave[(i-1)%self.Y][(j)%self.X][k] = 0
+                self.wave[(i-1)%self.Y][(j)%self.X][k] = False
 
         #right
         indices = [i for i, x in enumerate(self.wave[(i)%self.Y][(j+1)%self.X]) if x == 1]
@@ -218,7 +222,7 @@ class Output:
                     ok = 0
                     break
             if ok==0 :
-                self.wave[(i)%self.Y][(j+1)%self.X][k] = 0
+                self.wave[(i)%self.Y][(j+1)%self.X][k] = False
 
         #bottom
         indices = [i for i, x in enumerate(self.wave[(i+1)%self.Y][(j)%self.X]) if x == 1]
@@ -229,4 +233,4 @@ class Output:
                     ok = 0
                     break
             if ok==0 :
-                self.wave[(i+1)%self.Y][(j)%self.X][k] = 0
+                self.wave[(i+1)%self.Y][(j)%self.X][k] = False

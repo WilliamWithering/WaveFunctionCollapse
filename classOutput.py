@@ -150,28 +150,18 @@ class Output:
         # print("Collapsing : {}".format(coords))
         i = coords[0]
         j = coords[1]
-        #
-        #Sample frequencies
-        freq = np.asarray(self.patterns.frequencies)
-        #Current frequencies
-        curr_freq = np.asarray(self.cur_app)/(self.X * self.Y)
 
-        d_curr_freq = freq - curr_freq
-        d_curr_freq = [d_curr_freq[k] if self.wave[i][j][k]==1 else 0 for k in range(len(self.wave[i][j]))]
+        indices = [i for i, x in enumerate(self.wave[i][j]) if x == 1]
+        weights = [self.patterns.frequencies[i] for i in indices]
+        
+        # Rescaling the weights so that the sum is 1
+        weights = [w * 1/sum(weights) for w in weights]
 
-        max = np.argmax(d_curr_freq)
+        choice = random.choices(population = indices, weights = weights,k=1)
 
-        print("Collapsing for index {}, dfreq = {}".format(max, d_curr_freq[max]))
-
-
-        #Just a random choice
-        # indices = [i for i, x in enumerate(self.wave[i][j]) if x == 1]
-        # if indices != []:
-        #     max = random.choice(indices)
-        #
         self.wave[i][j] = np.zeros_like(self.wave[i][j])
-        self.wave[i][j][max] = 1
-        self.cur_app[max]+=1
+        self.wave[i][j][choice[0]] = 1
+        self.cur_app[choice[0]]+=1
         self.chosen[i][j]=1
 
 

@@ -186,68 +186,77 @@ class Output:
         #top left
         # Get the indices of all non-forbidden patterns
         indices = [i for i, x in enumerate(self.wave[(i-1)%self.Y][(j-1)%self.X]) if x == 1]
-        for k in indices:
-            if(self.patterns.patterns[k].getpixel((self.N-1,self.N-1)) != collapsed_pattern.getpixel((0,0))):
-                self.wave[(i-1)%self.Y][(j-1)%self.X][k] = False
+        #If there are more than one indices (means not collapsed yet)
+        if len(indices)>1:
+            for k in indices:
+                if(self.patterns.patterns[k].getpixel((self.N-1,self.N-1)) != collapsed_pattern.getpixel((0,0))):
+                    self.wave[(i-1)%self.Y][(j-1)%self.X][k] = False
 
         #top right
         indices = [i for i, x in enumerate(self.wave[(i-1)%self.Y][(j+1)%self.X]) if x == 1]
-        for k in indices:
-            if(self.patterns.patterns[k].getpixel((0,self.N-1)) != collapsed_pattern.getpixel((self.N-1,0))):
-                self.wave[(i-1)%self.Y][(j+1)%self.X][k] = False
+        if len(indices)>1:
+            for k in indices:
+                if(self.patterns.patterns[k].getpixel((0,self.N-1)) != collapsed_pattern.getpixel((self.N-1,0))):
+                    self.wave[(i-1)%self.Y][(j+1)%self.X][k] = False
 
         #bottom left
         indices = [i for i, x in enumerate(self.wave[(i+1)%self.Y][(j-1)%self.X]) if x == 1]
-        for k in indices:
-            if(self.patterns.patterns[k].getpixel((self.N-1,0)) != collapsed_pattern.getpixel((0,self.N-1))):
-                self.wave[(i+1)%self.Y][(j-1)%self.X][k] = False
+        if len(indices)>1:
+            for k in indices:
+                if(self.patterns.patterns[k].getpixel((self.N-1,0)) != collapsed_pattern.getpixel((0,self.N-1))):
+                    self.wave[(i+1)%self.Y][(j-1)%self.X][k] = False
 
         #bottom right
         indices = [i for i, x in enumerate(self.wave[(i+1)%self.Y][(j+1)%self.X]) if x == 1]
-        for k in indices:
-            if(self.patterns.patterns[k].getpixel((0,0)) != collapsed_pattern.getpixel((self.N-1,self.N-1))):
-                self.wave[(i+1)%self.Y][(j+1)%self.X][k] = False
+        if len(indices)>1:
+            for k in indices:
+                if(self.patterns.patterns[k].getpixel((0,0)) != collapsed_pattern.getpixel((self.N-1,self.N-1))):
+                    self.wave[(i+1)%self.Y][(j+1)%self.X][k] = False
 
         #left
         indices = [i for i, x in enumerate(self.wave[(i)%self.Y][(j-1)%self.X]) if x == 1]
-        for k in indices:
-            ok = 1
-            for l in range(self.N):
-                if(self.patterns.patterns[k].getpixel((self.N-1,l)) != collapsed_pattern.getpixel((0,l))):
-                    ok = 0
-                    break
-            if ok==0 :
-                self.wave[(i)%self.Y][(j-1)%self.X][k] = False
+        if len(indices)>1:
+            for k in indices:
+                ok = 1
+                for l in range(self.N):
+                    if(self.patterns.patterns[k].getpixel((self.N-1,l)) != collapsed_pattern.getpixel((0,l))):
+                        ok = 0
+                        break
+                if ok==0 :
+                    self.wave[(i)%self.Y][(j-1)%self.X][k] = False
 
         #top
         indices = [i for i, x in enumerate(self.wave[(i-1)%self.Y][(j)%self.X]) if x == 1]
-        for k in indices:
-            ok = 1
-            for l in range(self.N):
-                if(self.patterns.patterns[k].getpixel((l,self.N-1)) != collapsed_pattern.getpixel((l,0))):
-                    ok = 0
-                    break
-            if ok==0 :
-                self.wave[(i-1)%self.Y][(j)%self.X][k] = False
+        if len(indices)>1:
+            for k in indices:
+                ok = 1
+                for l in range(self.N):
+                    if(self.patterns.patterns[k].getpixel((l,self.N-1)) != collapsed_pattern.getpixel((l,0))):
+                        ok = 0
+                        break
+                if ok==0 :
+                    self.wave[(i-1)%self.Y][(j)%self.X][k] = False
 
         #right
         indices = [i for i, x in enumerate(self.wave[(i)%self.Y][(j+1)%self.X]) if x == 1]
-        for k in indices:
-            ok = 1
-            for l in range(self.N):
-                if(self.patterns.patterns[k].getpixel((0,l)) != collapsed_pattern.getpixel((self.N-1,l))):
-                    ok = 0
-                    break
-            if ok==0 :
-                self.wave[(i)%self.Y][(j+1)%self.X][k] = False
+        if len(indices)>1:
+            for k in indices:
+                ok = 1
+                for l in range(self.N):
+                    if(self.patterns.patterns[k].getpixel((0,l)) != collapsed_pattern.getpixel((self.N-1,l))):
+                        ok = 0
+                        break
+                if ok==0 :
+                    self.wave[(i)%self.Y][(j+1)%self.X][k] = False
 
         #bottom
         indices = [i for i, x in enumerate(self.wave[(i+1)%self.Y][(j)%self.X]) if x == 1]
-        for k in indices:
-            ok = 1
-            for l in range(self.N):
-                if(self.patterns.patterns[k].getpixel((l,0)) != collapsed_pattern.getpixel((l,self.N-1))):
-                    ok = 0
-                    break
-            if ok==0 :
-                self.wave[(i+1)%self.Y][(j)%self.X][k] = False
+        if len(indices)>1:
+            for k in indices:
+                ok = 1
+                for l in range(self.N):
+                    if(self.patterns.patterns[k].getpixel((l,0)) != collapsed_pattern.getpixel((l,self.N-1))):
+                        ok = 0
+                        break
+                if ok==0 :
+                    self.wave[(i+1)%self.Y][(j)%self.X][k] = False

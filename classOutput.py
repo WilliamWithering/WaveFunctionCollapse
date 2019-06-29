@@ -78,7 +78,7 @@ class Output:
                 indices = [i for i, x in enumerate(self.wave[i][j]) if x == 1]
                 for k in indices:
                     add += np.asarray(self.patterns.patterns[k]).astype('float') / active
-                self.squares[i][j] = add.astype('int')
+                self.squares[i][j] = np.transpose(add, axes=(1,0,2)).astype('int')
 
 
         for i in range(self.Y):
@@ -86,7 +86,6 @@ class Output:
                 surf = pg.surfarray.make_surface(self.squares[i][j])
                 sizes = tuple(const.zoom * x for x in surf.get_size())
                 surf = pg.transform.scale(surf,sizes)
-                surf = rot_center(surf,-90)
                 window.blit(surf,(j*(self.N-1)*const.zoom,i*(self.N-1)*const.zoom))
         pg.display.flip()
 

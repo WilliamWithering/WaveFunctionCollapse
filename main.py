@@ -33,14 +33,15 @@ c = (0,0)
 while running and c!=(-1,-1):
     output.update_display(window)
 
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
+            running = False
+
     c = output.get_min_entro_coord()
     output.collapse(c)
     output.info(c)
     output.update_entropy(c)
 
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            running = False
     pg.time.wait(10)
 
 #Keeps the window open when it's done

@@ -5,11 +5,23 @@ import const
 import random
 from math import log
 
+#Found on pygame.org
+def rot_center(image, angle):
+    """rotate an image while keeping its center and size"""
+    orig_rect = image.get_rect()
+    rot_image = pg.transform.rotate(image, angle)
+    rot_rect = orig_rect.copy()
+    rot_rect.center = rot_image.get_rect().center
+    rot_image = rot_image.subsurface(rot_rect).copy()
+    return rot_image
+
+
 class Output:
     def __init__(self, X, Y, P):
         """
             Initializes the wave and stores sizes and Patterns
         """
+        # Initializes all patterns to 1 (all allowed)
         self.wave = [[[True for _ in range(len(P.patterns))]
                             for _ in range(X)]
                             for _ in range(Y)]
@@ -21,6 +33,7 @@ class Output:
         self.squares = [[None for _ in range(self.X)]
                               for _ in range(self.Y)]
 
+        # Counts how many patterns of each type have been placed
         self.cur_app = [0 for _ in range(len(P.patterns))]
 
         # Not the real entropy for now, but will be reevaluated later
@@ -59,13 +72,13 @@ class Output:
 
         for i in range(self.Y):
             for j in range(self.X):
-                add = np.zeros_like(np.asarray(self.patterns.patterns[0]), dtype="float")#.reshape(self.N,self.N,-1)
+                add = np.zeros_like(np.asarray(self.patterns.patterns[0]), dtype="float")
                 active = sum(self.wave[i][j])
 
                 indices = [i for i, x in enumerate(self.wave[i][j]) if x == 1]
                 for k in indices:
                     add += np.asarray(self.patterns.patterns[k]).astype('float') / active
-                self.squares[j][i] = add.astype('int')
+                self.squares[i][j] = add.astype('int')
 
 
         for i in range(self.Y):
@@ -73,6 +86,7 @@ class Output:
                 surf = pg.surfarray.make_surface(self.squares[i][j])
                 sizes = tuple(const.zoom * x for x in surf.get_size())
                 surf = pg.transform.scale(surf,sizes)
+                surf = rot_center(surf,-90)
                 window.blit(surf,(j*(self.N-1)*const.zoom,i*(self.N-1)*const.zoom))
         pg.display.flip()
 
@@ -127,33 +141,37 @@ class Output:
 
     def collapse(self, coords):
         """
-            Collapse into one state, considering actual frequency and goal frequency
+            Collapse into one state,
+
+            Todo : Should be considering actual frequency and goal frequency
         """
-        print("Collapsing : {}".format(coords))
+        # print("Collapsing : {}".format(coords))
         i = coords[0]
         j = coords[1]
         #
-        # #Sample frequencies
-        # freq = np.asarray(self.patterns.frequencies)
-        # #Current frequencies
-        # curr_freq = np.asarray(self.cur_app)/(self.X * self.Y)
-        #
-        # d_curr_freq = freq - curr_freq
-        # d_curr_freq = [d_curr_freq[k] if self.wave[i][j][k]==1 else 0 for k in range(len(self.wave[i][j]))]
-        #
-        # max = np.argmax(d_curr_freq)
-        #
-        # print("Collapsing for index {}, dfreq = {}".format(max, d_curr_freq[max]))
+        #Sample frequencies
+        freq = np.asarray(self.patterns.frequencies)
+        #Current frequencies
+        curr_freq = np.asarray(self.cur_app)/(self.X * self.Y)
+
+        d_curr_freq = freq - curr_freq
+        d_curr_freq = [d_curr_freq[k] if self.wave[i][j][k]==1 else 0 for k in range(len(self.wave[i][j]))]
+
+        max = np.argmax(d_curr_freq)
+
+        print("Collapsing for index {}, dfreq = {}".format(max, d_curr_freq[max]))
+
 
         #Just a random choice
-        indices = [i for i, x in enumerate(self.wave[i][j]) if x == 1]
-        max = random.choice(indices)
-        print("Possible indices : {}".format(indices))
-        print("Collapsing for index {}".format(max))
-
+        # indices = [i for i, x in enumerate(self.wave[i][j]) if x == 1]
+        # if indices != []:
+        #     max = random.choice(indices)
+        #
         self.wave[i][j] = np.zeros_like(self.wave[i][j])
         self.wave[i][j][max] = 1
         self.cur_app[max]+=1
+        # else:
+        #     print("Contradiction.")
 
 
 

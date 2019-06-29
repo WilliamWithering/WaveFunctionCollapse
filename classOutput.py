@@ -40,6 +40,9 @@ class Output:
         self.entropies = [[1 for _ in range(self.X)]
                              for _ in range(self.Y)]
 
+        # Make distinction between chosen states, and propagation
+        self.chosen = [[0 for _ in range(self.X)]
+                             for _ in range(self.Y)]
 
 
     def init_entropy(self):
@@ -169,8 +172,7 @@ class Output:
         self.wave[i][j] = np.zeros_like(self.wave[i][j])
         self.wave[i][j][max] = 1
         self.cur_app[max]+=1
-        # else:
-        #     print("Contradiction.")
+        self.chosen[i][j]=1
 
 
 
@@ -178,6 +180,10 @@ class Output:
     def info(self, coords):
         """
             Propagates information of a recently collapsed position to others
+
+            Still to be fixed : case were the waveFunction contains only only one "True"
+            -> If this state has been chosen, then do not modify it
+            -> If this state hasn't, then forbid if necessary
         """
         i = coords[0]
         j = coords[1]
@@ -187,35 +193,35 @@ class Output:
         # Get the indices of all non-forbidden patterns
         indices = [i for i, x in enumerate(self.wave[(i-1)%self.Y][(j-1)%self.X]) if x == 1]
         #If there are more than one indices (means not collapsed yet)
-        if len(indices)>1:
+        if len(indices)>1 or self.chosen[i][j]==0:
             for k in indices:
                 if(self.patterns.patterns[k].getpixel((self.N-1,self.N-1)) != collapsed_pattern.getpixel((0,0))):
                     self.wave[(i-1)%self.Y][(j-1)%self.X][k] = False
 
         #top right
         indices = [i for i, x in enumerate(self.wave[(i-1)%self.Y][(j+1)%self.X]) if x == 1]
-        if len(indices)>1:
+        if len(indices)>1 or self.chosen[i][j]==0:
             for k in indices:
                 if(self.patterns.patterns[k].getpixel((0,self.N-1)) != collapsed_pattern.getpixel((self.N-1,0))):
                     self.wave[(i-1)%self.Y][(j+1)%self.X][k] = False
 
         #bottom left
         indices = [i for i, x in enumerate(self.wave[(i+1)%self.Y][(j-1)%self.X]) if x == 1]
-        if len(indices)>1:
+        if len(indices)>1 or self.chosen[i][j]==0:
             for k in indices:
                 if(self.patterns.patterns[k].getpixel((self.N-1,0)) != collapsed_pattern.getpixel((0,self.N-1))):
                     self.wave[(i+1)%self.Y][(j-1)%self.X][k] = False
 
         #bottom right
         indices = [i for i, x in enumerate(self.wave[(i+1)%self.Y][(j+1)%self.X]) if x == 1]
-        if len(indices)>1:
+        if len(indices)>1 or self.chosen[i][j]==0:
             for k in indices:
                 if(self.patterns.patterns[k].getpixel((0,0)) != collapsed_pattern.getpixel((self.N-1,self.N-1))):
                     self.wave[(i+1)%self.Y][(j+1)%self.X][k] = False
 
         #left
         indices = [i for i, x in enumerate(self.wave[(i)%self.Y][(j-1)%self.X]) if x == 1]
-        if len(indices)>1:
+        if len(indices)>1 or self.chosen[i][j]==0:
             for k in indices:
                 ok = 1
                 for l in range(self.N):
@@ -227,7 +233,7 @@ class Output:
 
         #top
         indices = [i for i, x in enumerate(self.wave[(i-1)%self.Y][(j)%self.X]) if x == 1]
-        if len(indices)>1:
+        if len(indices)>1 or self.chosen[i][j]==0:
             for k in indices:
                 ok = 1
                 for l in range(self.N):
@@ -239,7 +245,7 @@ class Output:
 
         #right
         indices = [i for i, x in enumerate(self.wave[(i)%self.Y][(j+1)%self.X]) if x == 1]
-        if len(indices)>1:
+        if len(indices)>1 or self.chosen[i][j]==0:
             for k in indices:
                 ok = 1
                 for l in range(self.N):
@@ -251,7 +257,7 @@ class Output:
 
         #bottom
         indices = [i for i, x in enumerate(self.wave[(i+1)%self.Y][(j)%self.X]) if x == 1]
-        if len(indices)>1:
+        if len(indices)>1 or self.chosen[i][j]==0:
             for k in indices:
                 ok = 1
                 for l in range(self.N):
